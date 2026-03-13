@@ -3,6 +3,8 @@ from PIL import Image
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 
 #icono de página
 icono = Image.open("Icono_diabetes.png")
@@ -16,8 +18,13 @@ st.markdown("<h1 style='color:blue;'>Predicción de la Diabetes</h1>", unsafe_al
 st.write("La diabetes es una condición crónica que afecta la forma en que el cuerpo utiliza la glucosa, su principal fuente de energía. Existen diferentes tipos de diabetes, y cada uno requiere cuidados especiales para mantener una buena calidad de vida. El objetivo de esta página es brindar información básica, fomentar la conciencia sobre la importancia de la prevención y promover hábitos saludables que ayuden a controlar la enfermedad.")
 
 ## Separador visual
-st.sidebar.markdown("---")
+###
+st.header("Objetivos")
 
+st.write("""- Analizar factores de riesgo asociados a la diabetes.
+- Identificar patrones en variables como edad, glucosa y BMI.
+- Visualizar tendencias y distribución de los datos.
+""")
 ##Seccion de genero de los pacientes
 
 def main():
@@ -31,8 +38,44 @@ df_cuenta = df.groupby('gender').count().reset_index()
 fig = px.pie(df_cuenta, names='gender', values='Patient_ID', title='Distribución de Género de los Pacientes')
 st.plotly_chart(fig, width=800)
 
+
+df_avg = df.groupby('diabetes_risk_category')['age'].mean().reset_index()
+fig = px.bar(df_avg, x='diabetes_risk_category', y='age', title='Edad Promedio por Categoría de Riesgo de Diabetes')
+st.plotly_chart(fig, width=800)
+
+
  ### Grafico de sidebar
-st.sidebar.plotly_chart(fig, width=800)
+##st.sidebar.plotly_chart(fig, width=800)
+
+
+
+diabetes = pd.read_csv("diabetes_risk_dataset.csv")
+
+edad_promedio = df.groupby('diabetes_risk_category')['age'].mean()
+
+plt.figure(figsize=(10,5))
+plt.bar(edad_promedio.index, edad_promedio.values)
+
+plt.title("Edad promedio según categoría de riesgo de diabetes")
+plt.xlabel("Categoría de riesgo")
+plt.ylabel("Edad promedio")
+
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+diabetes.columns = diabetes.columns.str.strip()
+diabetes.rename(columns={'age': 'Año', 'gender': 'Genero', 'bmi': 'IMC', 'blood_pressure': 'Presión Arterial', 'fasting_glucose_level': 'Glucosa en ayunas', 'insulin_level': 'Nivel de insulina', 'HbA1c_level': 'Nivel de insulina Glicosilada', 'cholesterol_level': 'Nivel de colesterol', 'triglycerides_level': 'Nivel de trigliceridos', 'physical_activity_level': 'Nivel de actividad fisica', 'daily_calorie_intake': 'Ingesta diaria de caloria', 'sugar_intake_grams_per_day': 'Ingesta de azucar g/dia', 'sleep_hours': 'Horas de sueño', 'stress_level':'Nivel de estres', 'family_history_diabetes': 'Historial Familiar', 'waist_circumference_cm': 'Circunferencia de cintura cm', 'diabetes_risk_score': 'Puntuacion de riesgo', 'diabetes_risk_category': 'Categoria de riesgo'}, inplace=True)
+print(diabetes.columns)
+
+diabetes.info()
+
+columns = ['Año', 'Genero', 'IMC', 'Presión Arterial', 'Glucosa en ayunas', 'Nivel de insulina Glicosilada', 'Nivel de insulina', 'Nivel de colesterol', 'Nivel de trigliceridos', 'Ingesta diaria de caloria', 'Ingesta de azucar g/dia', 'Horas de sueño', 'Nivel de estres', 'Circunferencia de cintura cm', 'Historial Familiar', 'Puntuacion de riesgo']
+print("---Reporte de valores en cero ---")
+for column in columns:
+   print(column, "valores en 0: ", (diabetes[column] == 0).sum())
+
+
 
 ## Placeholder for prediction result
 st.success("Prediction result will be displayed here.")
@@ -46,7 +89,7 @@ st.image(img, width=800)
 ### st.image("https://picsun.photos/800")
 
 
-with open("Video.mp4", "rb") as video_file:
+with open("ReflexivoDiabetes.mp4", "rb") as video_file:
     st.video(video_file.read(), start_time=0)
 
 
